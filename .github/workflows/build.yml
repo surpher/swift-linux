@@ -12,7 +12,10 @@ jobs:
       - name: Get swift version
         run: swift --version
 
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Build & Run
         run: |
-          swift build 
+          swift build
           .build/debug/SwiftHTTP
