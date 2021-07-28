@@ -14,7 +14,12 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "SwiftHTTP",
-            dependencies: []),
+            dependencies: ["SWAPIClient"]),
+        .target(
+            name: "SWAPIClient",
+            dependencies: [],
+            path: "Sources/SWAPIClient"
+        ),
         .testTarget(
             name: "SwiftHTTPTests",
             dependencies: ["SwiftHTTP"]),
