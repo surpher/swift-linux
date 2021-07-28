@@ -11,6 +11,7 @@ extension URLRequest {
 		request.setDefaultHeaders()
 		request.httpMethod = method.rawValue
 		request.httpBody = body
+
 		return request
 	}
 
@@ -22,8 +23,7 @@ extension URLRequest {
 
 	public static func defaultHeaders() -> [String: String] {
 		[
-			"Authorization": "Bearer \(UUID().uuidString)",
-			"Accept": "application/json"
+			"Accept": "application/json",
 		]
 	}
 

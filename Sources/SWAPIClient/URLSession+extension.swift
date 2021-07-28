@@ -6,6 +6,7 @@ import FoundationNetworking
 extension URLSession {
 
 	public func decodable<D>(for request: URLRequest, completion: @escaping ((Result<D, Error>) -> Void)) where D: Decodable {
+
 		dataTask(with: request) { data, response, error in
 			if let error = error {
 				completion(.failure(error))
@@ -34,6 +35,7 @@ extension URLSession {
 			}
 		}
 		.resume()
+
 	}
 
 }

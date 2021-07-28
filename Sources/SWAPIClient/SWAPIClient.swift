@@ -14,20 +14,16 @@ public class SWAPIClient: NSObject {
 
 	public let baseURL: String
 
-	private lazy var session = {
-		return URLSession(configuration: .ephemeral, delegate: nil, delegateQueue: .main)
-	}()
-
 	public init(baseURL: String) {
 		self.baseURL = baseURL
 	}
 
 	// MARK: - SWAPIClient
 	public func fetch<D>(endpoint: Endpoint, id: Int? = nil, completion: @escaping (D?, Error?) -> Void) where D: Decodable {
-		session
-			.decodable(
+		URLSession.shared.decodable(
 				for: .makeRequest(url: endpoint.url(baseURL: baseURL, id: id))
 			) { (result: Result<D, Error>) in
+				print("Result: \(result)")
 				switch result {
 				case .success(let object): completion(object, nil)
 				case .failure(let error): completion(nil, error)
