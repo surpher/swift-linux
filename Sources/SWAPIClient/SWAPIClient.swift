@@ -4,35 +4,52 @@ import Foundation
 import FoundationNetworking
 #endif
 
-public enum SWAPIClient {
+public class SWAPIClient: NSObject {
 
-    public static func fetchCharacter(identifier: Int = 1) {
-        print("Fetching data...")
+	public enum Endpoint: String {
+		case people
+		case planets
+		case starships
+	}
 
-        let sema = DispatchSemaphore(value: 0)
-        let url = URL(string: "https://swapi.dev/api/people/\(identifier)/")!
-        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-            print("Response:\n \(String(describing: response))")
+	public let baseURL: String
 
-            guard let data = data, error == nil else {
-                fatalError(error!.localizedDescription)
-            }
+	private lazy var session = {
+		return URLSession(configuration: .ephemeral, delegate: nil, delegateQueue: .main)
+	}()
 
-            print("Fetched data: \(data)")
-            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    print("JSON:\n\(json)")
-                }
-            } catch let jsonError {
-                print("Failed to serialize JSON: \(jsonError)")
-            }
+	public init(baseURL: String) {
+		self.baseURL = baseURL
+	}
 
-            sema.signal()
-        }
+	// MARK: - SWAPIClient
+	public func fetch<D>(endpoint: Endpoint, id: Int? = nil, completion: @escaping (D?, Error?) -> Void) where D: Decodable {
+		session
+			.decodable(
+				for: .makeRequest(url: endpoint.url(baseURL: baseURL, id: id))
+			) { (result: Result<D, Error>) in
+				switch result {
+				case .success(let object): completion(object, nil)
+				case .failure(let error): completion(nil, error)
+				}
+			}
+	}
 
-        task.resume()
-        sema.wait()
-    }
+}
+
+private extension SWAPIClient.Endpoint {
+
+	func url(baseURL: String, id: Int? = nil) -> URL {
+		// This API client only handles the following endpoints:
+		// - https://swapi.dev/api/people/{id?}
+		// - https://swapi.dev/api/planets/{id?}
+		// - https://swapi.dev/api/starships/{id?}
+		//
+		if let id = id {
+			return URL(string: "\(baseURL)/\(self.rawValue)/\(id)")!
+		} else {
+			return URL(string: "\(baseURL)/\(self.rawValue)")!
+		}
+	}
 
 }
