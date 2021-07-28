@@ -13,4 +13,6 @@ jobs:
         run: swift --version
 
       - name: Build & Run
-        run: swift build && .build/debug/SwiftHTTP
+        run: |
+          swift build 
+          .build/debug/SwiftHTTP
