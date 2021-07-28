@@ -1,0 +1,16 @@
+name: Build
+
+on: [push]
+
+jobs:
+  test:
+    name: Run project
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: fwal/setup-swift@v1
+      - name: Get swift version
+        run: swift --version
+
+      - name: Build & Run
+        run: swift build && .build/debug/SwiftHTTP
