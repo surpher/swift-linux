@@ -30,9 +30,8 @@ final class SwiftHTTPTests: XCTestCase {
 
 		print("mockService.baseURL: \(mockService.baseUrl)")
 
-		let apiClient = SWAPIClient(baseURL: mockService.baseUrl)
-
-		mockService.run { completed in
+		mockService.run { [unowned self] completed in
+			let apiClient = SWAPIClient(baseURL: mockService.baseUrl)
 			apiClient.fetch(endpoint: SWAPIClient.Endpoint.people, id: 1, completion: { (result: SWPerson?, error) in
 				// In this particular test we defined the response will be a status: 200. In order to get a result: SWPerson!, we need
 				// to write `.willRespondWith(status: 200, body: [ ...DSL defining a response body for SWPerson... ])`
