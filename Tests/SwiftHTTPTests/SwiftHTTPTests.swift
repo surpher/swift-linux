@@ -1,47 +1,47 @@
+import PactSwift
+@testable import SWAPIClient
 import XCTest
-import class Foundation.Bundle
+
+class MockServiceWrapper {
+	static let shared = MockServiceWrapper()
+	var mockService: MockService
+
+	private init() {
+		mockService = MockService(consumer: "macOS_app", provider: "test_provider")
+	}
+}
 
 final class SwiftHTTPTests: XCTestCase {
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
 
-        // Some of the APIs that we use below are available in macOS 10.13 and above.
-        guard #available(macOS 10.13, *) else {
-            return
-        }
+	let mockService = MockServiceWrapper.shared.mockService
 
-        // Mac Catalyst won't have `Process`, but it is supported for executables.
-        #if !targetEnvironment(macCatalyst)
+	func testMakesRequest() {
 
-        let fooBinary = productsDirectory.appendingPathComponent("SwiftHTTP")
+		mockService
+		.uponReceiving("A request for a list of users")
+		.given("users exist")
+		.withRequest(
+			method: .GET,
+			path: "/people/1"
+		)
+		.willRespondWith(
+			status: 200
+		)
 
-        let process = Process()
-        process.executableURL = fooBinary
+		print("mockService.baseURL: \(mockService.baseUrl)")
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
+		let apiClient = SWAPIClient(baseURL: mockService.baseUrl)
 
-        try process.run()
-        process.waitUntilExit()
+		mockService.run { completed in
+			apiClient.fetch(endpoint: SWAPIClient.Endpoint.people, id: 1, completion: { (result: SWPerson?, error) in
+				// In this particular test we defined the response will be a status: 200. In order to get a result: SWPerson!, we need
+				// to write `.willRespondWith(status: 200, body: [ ...DSL defining a response body for SWPerson... ])`
+				// for now, as long as the request is made, mockServer gets the request to /people/1/, we're golden.
+				completed()
+			})
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: data, encoding: .utf8)
+		}
 
-        XCTAssertEqual(output, "Hello, world!\n")
-        #endif
-    }
+	}
 
-    /// Returns path to the built products directory.
-    var productsDirectory: URL {
-      #if os(macOS)
-        for bundle in Bundle.allBundles where bundle.bundlePath.hasSuffix(".xctest") {
-            return bundle.bundleURL.deletingLastPathComponent()
-        }
-        fatalError("couldn't find the products directory")
-      #else
-        return Bundle.main.bundleURL
-      #endif
-    }
 }
