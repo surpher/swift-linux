@@ -15,6 +15,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Cache Rust libs
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-rust-libs-pactswift-linux
+        with:
+          path: ~/../pact-foundation/rust/target/release
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
       - name: Build Run Test
         run: |
           Support/build_test
